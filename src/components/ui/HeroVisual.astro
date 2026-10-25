@@ -1,0 +1,206 @@
+---
+
+---
+
+<div class="relative w-full max-w-lg mx-auto lg:max-w-none">
+  <!-- Architectural Datacenter Illustration Card -->
+  <div
+    class="relative rounded-2xl bg-gradient-to-tr from-[#FFF1CC]/60 via-[#FFFFFF] to-[#FBF9F4] p-3 sm:p-5 border border-[#E8E3D8] shadow-elevated overflow-hidden"
+  >
+    <!-- Top badge -->
+    <div
+      class="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1 rounded bg-white/95 backdrop-blur-sm border border-[#E8E3D8] shadow-subtle text-[11px] font-mono font-semibold text-[#15130F]"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-[#1E7F52] animate-pulse"></span>
+      <span>TIER-3+ CLOUD FABRIC</span>
+    </div>
+
+    <!-- Isometric Graphic -->
+    <svg
+      viewBox="0 0 600 450"
+      class="w-full h-auto select-none"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="serverGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#15130F"></stop>
+          <stop offset="100%" stop-color="#2A261E"></stop>
+        </linearGradient>
+        <linearGradient id="serverGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#3D372B"></stop>
+          <stop offset="100%" stop-color="#15130F"></stop>
+        </linearGradient>
+        <linearGradient id="topFace" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#E8E3D8" stop-opacity="0.95"></stop>
+          <stop offset="100%" stop-color="#FFF1CC" stop-opacity="0.95"></stop>
+        </linearGradient>
+        <linearGradient id="glowFloor" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FFB800" stop-opacity="0.18"></stop>
+          <stop offset="100%" stop-color="#E8E3D8" stop-opacity="0.06"></stop>
+        </linearGradient>
+      </defs>
+
+      <!-- Isometric Grid Floor -->
+      <path
+        d="M300 60 L540 195 L300 330 L60 195 Z"
+        fill="url(#glowFloor)"
+        stroke="#E8E3D8"
+        stroke-width="1.5"
+        stroke-dasharray="4 4"></path>
+
+      <!-- Grid lines -->
+      <path
+        d="M120 162 L360 297"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+      <path
+        d="M180 128 L420 263"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+      <path
+        d="M240 94 L480 230"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+
+      <path
+        d="M480 162 L240 297"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+      <path
+        d="M420 128 L180 263"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+      <path
+        d="M360 94 L120 230"
+        stroke="#E8E3D8"
+        stroke-width="0.8"
+        stroke-dasharray="3 3"></path>
+
+      <!-- Back Server Node (Left) -->
+      <g transform="translate(140, 110)">
+        <!-- Top -->
+        <path
+          d="M70 0 L140 40 L70 80 L0 40 Z"
+          fill="url(#topFace)"
+          stroke="#E8E3D8"
+          stroke-width="1.2"></path>
+        <!-- Left Side -->
+        <path d="M0 40 L70 80 L70 160 L0 120 Z" fill="url(#serverGrad1)"></path>
+        <!-- Right Side -->
+        <path d="M70 80 L140 40 L140 120 L70 160 Z" fill="url(#serverGrad2)"></path>
+        <!-- Server lights -->
+        <circle cx="20" cy="65" r="2.5" fill="#1E7F52"></circle>
+        <circle cx="35" cy="73" r="2.5" fill="#FFB800"></circle>
+        <circle cx="50" cy="82" r="2.5" fill="#1E7F52"></circle>
+        <line
+          x1="15"
+          y1="80"
+          x2="60"
+          y2="105"
+          stroke="#E8E3D8"
+          stroke-width="1.5"
+          stroke-dasharray="3 2"></line>
+        <line
+          x1="15"
+          y1="95"
+          x2="60"
+          y2="120"
+          stroke="#E8E3D8"
+          stroke-width="1.5"
+          stroke-dasharray="3 2"></line>
+      </g>
+
+      <!-- Central Storage Cluster (Back Right) -->
+      <g transform="translate(310, 90)">
+        <!-- Top -->
+        <path
+          d="M80 0 L160 45 L80 90 L0 45 Z"
+          fill="url(#topFace)"
+          stroke="#E8E3D8"
+          stroke-width="1.2"></path>
+        <!-- Left Side -->
+        <path d="M0 45 L80 90 L80 190 L0 145 Z" fill="url(#serverGrad1)"></path>
+        <!-- Right Side -->
+        <path d="M80 90 L160 45 L160 145 L80 190 Z" fill="url(#serverGrad2)"></path>
+        <!-- Activity LEDs -->
+        <circle cx="25" cy="72" r="3" fill="#1E7F52"></circle>
+        <circle cx="45" cy="83" r="3" fill="#FFB800"></circle>
+        <circle cx="65" cy="94" r="3" fill="#1E7F52"></circle>
+        <line x1="20" y1="110" x2="70" y2="138" stroke="#E8E3D8" stroke-width="2"></line>
+        <line x1="20" y1="130" x2="70" y2="158" stroke="#E8E3D8" stroke-width="2"></line>
+      </g>
+
+      <!-- Primary Front Server Block -->
+      <g transform="translate(210, 180)">
+        <!-- Top Face -->
+        <path
+          d="M90 0 L180 50 L90 100 L0 50 Z"
+          fill="#FFFFFF"
+          stroke="#FFB800"
+          stroke-width="1.5"></path>
+        <!-- Left Face -->
+        <path d="M0 50 L90 100 L90 200 L0 150 Z" fill="url(#serverGrad1)"></path>
+        <!-- Right Face -->
+        <path d="M90 100 L180 50 L180 150 L90 200 Z" fill="url(#serverGrad2)"></path>
+
+        <!-- High-density bays -->
+        <line
+          x1="15"
+          y1="80"
+          x2="75"
+          y2="114"
+          stroke="#FFF1CC"
+          stroke-width="3"
+          stroke-linecap="round"></line>
+        <line
+          x1="15"
+          y1="105"
+          x2="75"
+          y2="139"
+          stroke="#FFF1CC"
+          stroke-width="3"
+          stroke-linecap="round"></line>
+        <line
+          x1="15"
+          y1="130"
+          x2="75"
+          y2="164"
+          stroke="#FFF1CC"
+          stroke-width="3"
+          stroke-linecap="round"></line>
+
+        <!-- Status indicators -->
+        <circle cx="25" cy="75" r="3" fill="#1E7F52"></circle>
+        <circle cx="45" cy="86" r="3" fill="#1E7F52"></circle>
+        <circle cx="65" cy="97" r="3" fill="#1E7F52"></circle>
+      </g>
+
+      <!-- Floating Connection Nodes -->
+      <g stroke="#FFB800" stroke-width="1.5" stroke-dasharray="3 3">
+        <line x1="210" y1="190" x2="280" y2="230"></line>
+        <line x1="380" y1="180" x2="300" y2="230"></line>
+      </g>
+
+      <!-- Data pulses -->
+      <circle cx="280" cy="230" r="5" fill="#FFB800"></circle>
+      <circle cx="280" cy="230" r="10" stroke="#FFB800" stroke-width="1" opacity="0.4"
+      ></circle>
+    </svg>
+
+    <!-- Bottom label -->
+    <div class="mt-2 flex items-center justify-between text-xs text-[#605A50]">
+      <span class="font-mono text-[11px] text-[#15130F] font-semibold tracking-wide">
+        HOSTAMBLE ISOLATED ARCHITECTURE
+      </span>
+      <span class="text-[11px] text-[#605A50] font-mono">
+        NVMe PCIe Gen4 • AMD EPYC
+      </span>
+    </div>
+  </div>
+</div>

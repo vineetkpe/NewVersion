@@ -1,0 +1,82 @@
+---
+interface Props {
+  readonly href?: string;
+  readonly type?: 'button' | 'submit' | 'reset';
+  readonly variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  readonly size?: 'sm' | 'md' | 'lg';
+  readonly class?: string;
+  readonly disabled?: boolean;
+  readonly ariaLabel?: string;
+  readonly id?: string;
+}
+
+const {
+  href,
+  type = 'button',
+  variant = 'primary',
+  size = 'md',
+  class: className = '',
+  disabled = false,
+  ariaLabel,
+  id,
+} = Astro.props;
+
+const baseStyles =
+  'inline-flex items-center justify-center font-medium font-sans transition-all duration-150 rounded-lg cursor-pointer select-none text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
+
+const variantStyles = {
+  primary:
+    'bg-[#FFB800] text-[#15130F] font-semibold hover:bg-[#E6A500] active:bg-[#CC9300] border border-[#E6A500] shadow-subtle',
+  secondary:
+    'bg-[#FFFFFF] text-[#15130F] hover:text-[#15130F] border border-[#E8E3D8] hover:border-[#FFB800] hover:bg-[#FFF1CC] shadow-subtle',
+  outline:
+    'bg-transparent text-[#15130F] border border-[#E8E3D8] hover:border-[#FFB800] hover:bg-[#FFF1CC]',
+  ghost: 'bg-transparent text-[#15130F] hover:bg-[#FFF1CC] border border-transparent',
+};
+
+const sizeStyles = {
+  sm: 'text-xs px-3 py-1.5 gap-1.5 rounded-md',
+  md: 'text-sm px-5 py-2.5 gap-2 rounded-lg',
+  lg: 'text-base px-6 py-3.5 gap-2.5 font-semibold rounded-lg',
+};
+
+const disabledStyles = disabled
+  ? 'opacity-50 pointer-events-none cursor-not-allowed'
+  : '';
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      id={id}
+      aria-label={ariaLabel}
+      aria-disabled={disabled ? 'true' : undefined}
+      class:list={[
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
+        disabledStyles,
+        className,
+      ]}
+    >
+      <slot />
+    </a>
+  ) : (
+    <button
+      type={type}
+      id={id}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      class:list={[
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
+        disabledStyles,
+        className,
+      ]}
+    >
+      <slot />
+    </button>
+  )
+}

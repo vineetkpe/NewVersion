@@ -1,0 +1,259 @@
+---
+import Container from './Container.astro';
+import CurrencySelector from '../pricing/CurrencySelector.astro';
+import Button from '../ui/Button.astro';
+
+interface Props {
+  readonly currentPath?: string;
+}
+
+const { currentPath: _currentPath = '/' } = Astro.props;
+---
+
+<header
+  class="sticky top-0 z-40 w-full bg-[#FBF9F4]/95 backdrop-blur-md border-b border-[#E8E3D8] transition-all"
+>
+  <Container as="div" class="flex items-center justify-between h-[72px]">
+    <!-- Brand Logo -->
+    <a
+      href="/"
+      class="flex items-center gap-2.5 select-none focus-visible:outline-[#FFB800] group"
+      aria-label="HostAmble Home"
+    >
+      <div
+        class="w-8 h-8 rounded-lg bg-[#FFB800] flex items-center justify-center text-[#15130F] font-bold text-base shadow-subtle group-hover:bg-[#E6A500] transition-colors"
+      >
+        <span class="tracking-tight font-display">H</span>
+      </div>
+      <span
+        class="font-bold text-xl text-[#15130F] font-display tracking-tight leading-none"
+      >
+        HostAmble
+      </span>
+    </a>
+
+    <!-- Desktop Navigation matching Editorial Layout -->
+    <nav
+      aria-label="Primary Navigation"
+      class="hidden lg:flex items-center gap-8 text-sm font-medium"
+    >
+      <div class="relative group">
+        <a
+          href="/#hosting-models"
+          class="inline-flex items-center gap-1 text-[#15130F] hover:text-[#E6A500] transition-colors py-2"
+        >
+          <span>Hosting</span>
+          <svg
+            class="w-3.5 h-3.5 text-[#605A50] transition-transform group-hover:rotate-180"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </a>
+      </div>
+
+      <div class="relative group">
+        <a
+          href="/#domain-search"
+          class="inline-flex items-center gap-1 text-[#15130F] hover:text-[#E6A500] transition-colors py-2"
+        >
+          <span>Domains</span>
+          <svg
+            class="w-3.5 h-3.5 text-[#605A50] transition-transform group-hover:rotate-180"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </a>
+      </div>
+
+      <a
+        href="/#hosting-models"
+        class="text-[#15130F] hover:text-[#E6A500] transition-colors py-2"
+      >
+        WordPress
+      </a>
+
+      <a
+        href="/#hosting-models"
+        class="text-[#15130F] hover:text-[#E6A500] transition-colors py-2"
+      >
+        Reseller
+      </a>
+    </nav>
+
+    <!-- Desktop Right Utilities & Actions -->
+    <div class="hidden sm:flex items-center gap-4">
+      <!-- Currency Switcher -->
+      <CurrencySelector id="header-currency-selector" />
+
+      <a
+        href="#login"
+        class="text-sm font-medium text-[#15130F] hover:text-[#E6A500] transition-colors px-2 py-1"
+      >
+        Client Login
+      </a>
+
+      <Button href="#pricing" variant="primary" size="md"> Get Started </Button>
+    </div>
+
+    <!-- Mobile Navigation Toggle -->
+    <div class="flex items-center gap-2 sm:hidden">
+      <CurrencySelector id="mobile-currency-quick" />
+      <button
+        id="mobile-nav-trigger"
+        type="button"
+        class="p-2 rounded text-[#15130F] hover:bg-[#FFF1CC] focus-visible:outline-[#FFB800] cursor-pointer"
+        aria-label="Open mobile navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </Container>
+
+  <!-- Mobile Drawer Component -->
+  <div
+    id="mobile-nav-backdrop"
+    class="fixed inset-0 bg-[#15130F]/40 backdrop-blur-sm z-40 hidden transition-opacity duration-200"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div
+    id="mobile-nav-drawer"
+    class="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-[#FBF9F4] z-50 border-l border-[#E8E3D8] shadow-elevated transform translate-x-full transition-transform duration-200 ease-in-out flex flex-col"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Mobile Navigation"
+    aria-hidden="true"
+  >
+    <!-- Drawer Header -->
+    <div class="flex items-center justify-between p-6 border-b border-[#E8E3D8]">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#FFB800]"></span>
+        <span class="font-bold text-lg text-[#15130F] tracking-tight">HostAmble</span>
+      </div>
+      <button
+        id="mobile-nav-close"
+        type="button"
+        class="p-2 rounded text-[#605A50] hover:text-[#15130F] hover:bg-[#FFF1CC] focus-visible:outline-[#FFB800] cursor-pointer"
+        aria-label="Close navigation menu"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Drawer Navigation Links -->
+    <nav class="flex-1 overflow-y-auto p-6 space-y-1">
+      <p class="text-xs font-mono uppercase tracking-wider text-[#605A50] mb-3">Menu</p>
+      <a
+        href="/#hosting-models"
+        class="block px-3 py-2.5 rounded text-sm font-medium text-[#15130F] hover:bg-[#FFF1CC]"
+        >Hosting Plans</a
+      >
+      <a
+        href="/#domain-search"
+        class="block px-3 py-2.5 rounded text-sm font-medium text-[#15130F] hover:bg-[#FFF1CC]"
+        >Domain Names</a
+      >
+      <a
+        href="/#pricing"
+        class="block px-3 py-2.5 rounded text-sm font-medium text-[#15130F] hover:bg-[#FFF1CC]"
+        >Pricing & Billing</a
+      >
+      <a
+        href="/#control-panel"
+        class="block px-3 py-2.5 rounded text-sm font-medium text-[#15130F] hover:bg-[#FFF1CC]"
+        >Cloud Console</a
+      >
+      <a
+        href="/#faq"
+        class="block px-3 py-2.5 rounded text-sm font-medium text-[#15130F] hover:bg-[#FFF1CC]"
+        >FAQ</a
+      >
+    </nav>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-6 border-t border-[#E8E3D8] bg-[#FBF9F4] space-y-3">
+      <Button href="#pricing" variant="primary" size="md" class="w-full">
+        Get Started
+      </Button>
+    </div>
+  </div>
+</header>
+
+<script>
+  function setupMobileMenu() {
+    const trigger = document.getElementById('mobile-nav-trigger');
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    const closeBtn = document.getElementById('mobile-nav-close');
+
+    if (!trigger || !drawer || !backdrop || !closeBtn) return;
+
+    function openMenu() {
+      drawer?.classList.remove('translate-x-full');
+      backdrop?.classList.remove('hidden');
+      trigger?.setAttribute('aria-expanded', 'true');
+      drawer?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeBtn?.focus();
+    }
+
+    function closeMenu() {
+      drawer?.classList.add('translate-x-full');
+      backdrop?.classList.add('hidden');
+      trigger?.setAttribute('aria-expanded', 'false');
+      drawer?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      trigger?.focus();
+    }
+
+    trigger.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    drawer.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer.classList.contains('translate-x-full')) {
+        closeMenu();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupMobileMenu);
+  } else {
+    setupMobileMenu();
+  }
+  document.addEventListener('astro:page-load', setupMobileMenu);
+</script>

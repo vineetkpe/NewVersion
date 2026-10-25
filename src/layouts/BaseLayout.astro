@@ -1,0 +1,80 @@
+---
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import { SITE_CONFIG } from '../data/site';
+import '../styles/global.css';
+
+interface Props {
+  readonly title?: string;
+  readonly description?: string;
+  readonly canonical?: string;
+  readonly currentPath?: string;
+  readonly noIndex?: boolean;
+}
+
+const {
+  title = `${SITE_CONFIG.name} — ${SITE_CONFIG.tagline}`,
+  description = SITE_CONFIG.description,
+  canonical,
+  currentPath = Astro.url.pathname,
+  noIndex = false,
+} = Astro.props;
+
+const canonicalUrl = canonical || new URL(currentPath, SITE_CONFIG.url).href;
+const pageTitle = title.includes(SITE_CONFIG.name)
+  ? title
+  : `${title} | ${SITE_CONFIG.name}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Meta Tags -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph Protocol -->
+    <meta property="og:site_name" content={SITE_CONFIG.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Fonts (Preconnect for performance) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-white text-text-dark min-h-screen flex flex-col antialiased">
+    <!-- Accessible Skip Link -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-primary focus:text-white focus:rounded focus:shadow-elevated"
+    >
+      Skip to main content
+    </a>
+
+    <Header currentPath={currentPath} />
+
+    <main id="main-content" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

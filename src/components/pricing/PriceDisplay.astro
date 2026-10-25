@@ -1,0 +1,204 @@
+---
+import { getProductById } from '../../data/products';
+import { lookupProductPrice } from '../../lib/pricing/lookup';
+import { DEFAULT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '../../data/currencies';
+import type { BillingPeriod, Product } from '../../lib/pricing/types';
+import type { CurrencyCode } from '../../lib/currency/types';
+
+interface Props {
+  readonly product: Product | string;
+  readonly period?: BillingPeriod;
+  readonly initialCurrency?: CurrencyCode;
+  readonly showPeriodSuffix?: boolean;
+  readonly class?: string;
+}
+
+const {
+  product: productProp,
+  period = 'monthly',
+  initialCurrency = DEFAULT_CURRENCY,
+  showPeriodSuffix = true,
+  class: className = '',
+} = Astro.props;
+
+const product =
+  typeof productProp === 'string' ? getProductById(productProp) : productProp;
+
+if (!product) {
+  throw new Error(
+    `[HostAmble PriceDisplay] Invalid product provided: ${JSON.stringify(productProp)}`
+  );
+}
+
+// Initial server-rendered price calculation
+const initialLookup = lookupProductPrice(product, initialCurrency, period);
+
+// Build serializable price matrix for client-side currency and period updates
+const priceMatrix: Record<
+  string,
+  Record<string, { formatted: string; isAvailable: boolean; suffix: string }>
+> = {};
+
+for (const cur of SUPPORTED_CURRENCY_CODES) {
+  priceMatrix[cur] = {};
+  for (const p of product.supportedBillingPeriods) {
+    const res = lookupProductPrice(product, cur, p);
+    priceMatrix[cur]![p] = {
+      formatted: res.formatted,
+      isAvailable: res.isAvailable,
+      suffix: res.periodSuffix,
+    };
+  }
+}
+---
+
+<div
+  class:list={['inline-flex items-baseline gap-1', className]}
+  data-price-container
+  data-product-id={product.id}
+  data-active-period={period}
+  data-price-matrix={JSON.stringify(priceMatrix)}
+>
+  {
+    initialLookup.isAvailable ? (
+      <>
+        {initialLookup.isPromotional && initialLookup.formattedRegular && (
+          <span
+            data-price-regular
+            class="text-xs sm:text-sm text-text-muted line-through mr-1"
+            title={`Regular price: ${initialLookup.formattedRegular}`}
+          >
+            {initialLookup.formattedRegular}
+          </span>
+        )}
+        <span
+          data-price-value
+          class="text-2xl sm:text-3xl font-bold tracking-tight text-text-dark"
+        >
+          {initialLookup.formatted}
+        </span>
+        {showPeriodSuffix && (
+          <span
+            data-price-suffix
+            class="text-xs sm:text-sm text-text-secondary font-medium"
+          >
+            {initialLookup.periodSuffix}
+          </span>
+        )}
+      </>
+    ) : (
+      <span
+        data-price-unavailable
+        class="text-sm font-semibold text-text-muted bg-surface-subtle px-2 py-1 rounded border border-surface-border"
+      >
+        {initialLookup.formatted}
+      </span>
+    )
+  }
+</div>
+
+<script>
+  import {
+    CURRENCY_CHANGE_EVENT,
+    getSavedCurrencyPreference,
+  } from '../../lib/currency/preferences';
+  import type { CurrencyCode } from '../../lib/currency/types';
+  import type { BillingPeriod } from '../../lib/pricing/types';
+
+  function updatePriceDisplay(
+    container: HTMLElement,
+    targetCurrency: CurrencyCode,
+    targetPeriod?: BillingPeriod
+  ) {
+    const matrixRaw = container.getAttribute('data-price-matrix');
+    if (!matrixRaw) return;
+
+    let matrix: Record<
+      string,
+      Record<string, { formatted: string; isAvailable: boolean; suffix: string }>
+    >;
+    try {
+      matrix = JSON.parse(matrixRaw);
+    } catch {
+      return;
+    }
+
+    const currentPeriod =
+      targetPeriod ||
+      (container.getAttribute('data-active-period') as BillingPeriod) ||
+      'monthly';
+    if (targetPeriod) {
+      container.setAttribute('data-active-period', targetPeriod);
+    }
+
+    const currencyData = matrix[targetCurrency];
+    const periodData = currencyData ? currencyData[currentPeriod] : undefined;
+
+    const valueEl = container.querySelector<HTMLElement>('[data-price-value]');
+    const suffixEl = container.querySelector<HTMLElement>('[data-price-suffix]');
+    const regularEl = container.querySelector<HTMLElement>('[data-price-regular]');
+    const unavailableEl = container.querySelector<HTMLElement>(
+      '[data-price-unavailable]'
+    );
+
+    if (!periodData || !periodData.isAvailable) {
+      // Show unavailable state cleanly
+      if (valueEl) valueEl.textContent = 'Price unavailable';
+      if (suffixEl) suffixEl.style.display = 'none';
+      if (regularEl) regularEl.style.display = 'none';
+      if (unavailableEl) {
+        unavailableEl.style.display = 'inline-block';
+        unavailableEl.textContent = 'Price unavailable';
+      }
+    } else {
+      if (unavailableEl) unavailableEl.style.display = 'none';
+      if (valueEl) {
+        valueEl.style.display = 'inline';
+        valueEl.textContent = periodData.formatted;
+      }
+      if (suffixEl) {
+        suffixEl.style.display = 'inline';
+        suffixEl.textContent = periodData.suffix;
+      }
+    }
+  }
+
+  function initPriceDisplays() {
+    const containers = document.querySelectorAll<HTMLElement>('[data-price-container]');
+    if (!containers.length) return;
+
+    // Synchronize to stored currency preference on client load
+    const pref = getSavedCurrencyPreference();
+    containers.forEach((container) => {
+      updatePriceDisplay(container, pref.currency);
+    });
+
+    // Listen to currency changes
+    window.addEventListener(CURRENCY_CHANGE_EVENT, (e: Event) => {
+      const customEvent = e as CustomEvent<{ currency: CurrencyCode }>;
+      const curr = customEvent.detail?.currency;
+      if (!curr) return;
+      containers.forEach((container) => {
+        updatePriceDisplay(container, curr);
+      });
+    });
+
+    // Listen to billing period changes
+    window.addEventListener('hostamble:period-change', (e: Event) => {
+      const customEvent = e as CustomEvent<{ period: BillingPeriod; group: string }>;
+      const period = customEvent.detail?.period;
+      if (!period) return;
+      const currentCurr = getSavedCurrencyPreference().currency;
+      containers.forEach((container) => {
+        updatePriceDisplay(container, currentCurr, period);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPriceDisplays);
+  } else {
+    initPriceDisplays();
+  }
+  document.addEventListener('astro:page-load', initPriceDisplays);
+</script>

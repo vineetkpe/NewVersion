@@ -1,0 +1,10 @@
+# Security and caching headers for Cloudflare deployment
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Immutable caching for hashed Astro assets
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,49 @@
+---
+interface Props {
+  readonly title: string;
+  readonly defaultOpen?: boolean;
+  readonly class?: string;
+  readonly id?: string;
+}
+
+const { title, defaultOpen = false, class: className = '', id } = Astro.props;
+---
+
+<details
+  id={id}
+  open={defaultOpen}
+  class:list={[
+    'group border border-surface-border rounded bg-white transition-colors duration-150',
+    className,
+  ]}
+>
+  <summary
+    class="flex items-center justify-between p-4 cursor-pointer font-medium text-text select-none list-none hover:bg-surface-subtle focus-visible:outline-brand-primary"
+  >
+    <span class="text-base font-semibold">{title}</span>
+    <span
+      class="ml-4 flex-shrink-0 text-text-secondary transition-transform duration-200 group-open:rotate-180"
+      aria-hidden="true"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </span>
+  </summary>
+  <div
+    class="px-4 pb-4 pt-1 text-sm text-text-secondary border-t border-surface-border/50"
+  >
+    <slot />
+  </div>
+</details>
+
+<style>
+  /* Hide standard browser disclosure triangle */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

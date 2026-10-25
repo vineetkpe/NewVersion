@@ -1,0 +1,145 @@
+---
+import { PRIMARY_NAVIGATION } from '../../data/site';
+import CurrencySelector from '../pricing/CurrencySelector.astro';
+import Button from '../ui/Button.astro';
+
+interface Props {
+  readonly currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+---
+
+<!-- Mobile Navigation Drawer Overlay -->
+<div
+  id="mobile-nav-backdrop"
+  class="fixed inset-0 bg-[#171B2D]/40 backdrop-blur-sm z-40 hidden transition-opacity duration-200"
+  aria-hidden="true"
+>
+</div>
+
+<div
+  id="mobile-nav-drawer"
+  class="fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm bg-white z-50 border-l border-surface-border shadow-elevated transform translate-x-full transition-transform duration-200 ease-in-out flex flex-col"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Mobile Navigation"
+  aria-hidden="true"
+>
+  <!-- Drawer Header -->
+  <div class="flex items-center justify-between p-6 border-b border-surface-border">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-brand-primary"></span>
+      <span class="font-bold text-lg text-text-dark tracking-tight">HostAmble</span>
+    </div>
+    <button
+      id="mobile-nav-close"
+      type="button"
+      class="p-2 rounded text-text-secondary hover:text-text-dark hover:bg-surface-subtle focus-visible:outline-brand-primary cursor-pointer"
+      aria-label="Close navigation menu"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Body Navigation Links -->
+  <nav class="flex-1 overflow-y-auto p-6 space-y-1">
+    <p class="text-xs font-mono uppercase tracking-wider text-text-muted mb-3">
+      Navigation
+    </p>
+    {
+      PRIMARY_NAVIGATION.map((item) => {
+        const isActive = currentPath === item.href;
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'flex items-center justify-between px-3 py-2.5 rounded text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-brand-lavender text-brand-primary font-semibold'
+                : 'text-text-dark hover:bg-surface-subtle',
+            ]}
+          >
+            <span>{item.label}</span>
+            <svg
+              class="w-4 h-4 text-text-muted"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </a>
+        );
+      })
+    }
+  </nav>
+
+  <!-- Drawer Footer Actions -->
+  <div class="p-6 border-t border-surface-border bg-surface-subtle space-y-4">
+    <div class="flex items-center justify-between">
+      <span class="text-xs font-medium text-text-secondary">Billing Currency</span>
+      <CurrencySelector id="mobile-currency-select" />
+    </div>
+    <Button href="/pricing" variant="primary" size="md" class="w-full">
+      View All Plans
+    </Button>
+  </div>
+</div>
+
+<script>
+  function setupMobileMenu() {
+    const trigger = document.getElementById('mobile-nav-trigger');
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    const closeBtn = document.getElementById('mobile-nav-close');
+
+    if (!trigger || !drawer || !backdrop || !closeBtn) return;
+
+    function openMenu() {
+      drawer?.classList.remove('translate-x-full');
+      backdrop?.classList.remove('hidden');
+      trigger?.setAttribute('aria-expanded', 'true');
+      drawer?.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeBtn?.focus();
+    }
+
+    function closeMenu() {
+      drawer?.classList.add('translate-x-full');
+      backdrop?.classList.add('hidden');
+      trigger?.setAttribute('aria-expanded', 'false');
+      drawer?.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      trigger?.focus();
+    }
+
+    trigger.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer.classList.contains('translate-x-full')) {
+        closeMenu();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupMobileMenu);
+  } else {
+    setupMobileMenu();
+  }
+  document.addEventListener('astro:page-load', setupMobileMenu);
+</script>

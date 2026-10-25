@@ -1,0 +1,141 @@
+---
+import Container from './Container.astro';
+import CurrencySelector from '../pricing/CurrencySelector.astro';
+
+const FOOTER_COLUMNS = [
+  {
+    title: 'WEB HOSTING',
+    links: [
+      { label: 'Shared NVMe Hosting', href: '#hosting-models' },
+      { label: 'WordPress Hosting', href: '#hosting-models' },
+      { label: 'Cloud Compute Slices', href: '#hosting-models' },
+      { label: 'Reseller Infrastructure', href: '#hosting-models' },
+      { label: 'High-Performance VPS', href: '#pricing' },
+      { label: 'Dedicated Infrastructure', href: '#pricing' },
+    ],
+  },
+  {
+    title: 'DOMAINS',
+    links: [
+      { label: 'Domain Name Registration', href: '#domain-search' },
+      { label: 'Transfer Your Domain', href: '#domain-search' },
+      { label: '.IN Domain Offers', href: '#domain-search' },
+      { label: '.COM Domain Offers', href: '#domain-search' },
+      { label: 'WHOIS Privacy Protection', href: '#domain-search' },
+      { label: 'DNS Management Console', href: '#control-panel' },
+    ],
+  },
+  {
+    title: 'INFRASTRUCTURE',
+    links: [
+      { label: 'Datacenter Locations', href: '#fundamentals' },
+      { label: 'Server Security & Firewalls', href: '#fundamentals' },
+      { label: 'Automated Off-Site Backups', href: '#fundamentals' },
+      { label: 'DDoS Mitigation Shield', href: '#fundamentals' },
+      { label: 'Network Uptime SLA (99.99%)', href: '#fundamentals' },
+      { label: 'Live Status Dashboard', href: '#control-panel' },
+    ],
+  },
+  {
+    title: 'COMPANY & SUPPORT',
+    links: [
+      { label: 'About HostAmble', href: '#creator-banner' },
+      { label: 'Knowledgebase & Setup Guides', href: '#faq' },
+      { label: 'Technical Ticket Support', href: '#faq' },
+      { label: 'Client Dashboard Login', href: '#login' },
+      { label: 'Contact Engineering', href: 'mailto:support@hostamble.com' },
+      { label: 'Responsible Disclosure', href: '#terms' },
+    ],
+  },
+];
+---
+
+<footer class="w-full bg-[#15130F] text-white pt-16 pb-12 border-t border-[#26231D]">
+  <Container as="div">
+    <!-- Top Row: Brand, Status, Email, Currency -->
+    <div
+      class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-12 border-b border-[#26231D]"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded bg-[#FFB800] flex items-center justify-center text-[#15130F] font-bold text-lg shadow-sm"
+        >
+          <span>H</span>
+        </div>
+        <div>
+          <span class="font-bold text-xl text-white tracking-tight block">HostAmble</span>
+          <span class="text-xs text-[#A39E93] tracking-wide"
+            >Enterprise Web & Domain Infrastructure</span
+          >
+        </div>
+      </div>
+
+      <!-- Center Status Badge -->
+      <div class="flex items-center gap-4 flex-wrap">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#221F18] border border-[#383329] text-xs text-[#E8E3D8]"
+        >
+          <span class="w-2 h-2 rounded-full bg-[#1E7F52] animate-pulse"></span>
+          <span>All Systems Operational • 99.99% Network SLA</span>
+        </div>
+
+        <a
+          href="mailto:support@hostamble.com"
+          class="text-xs text-[#E8E3D8] hover:text-[#FFB800] transition-colors"
+        >
+          ✉ support@hostamble.com
+        </a>
+
+        <!-- Footer Currency Selector -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-[#A39E93]">Currency:</span>
+          <CurrencySelector id="footer-currency-selector" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Navigation Columns -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-b border-[#26231D]">
+      {
+        FOOTER_COLUMNS.map((col) => (
+          <div>
+            <h4 class="text-xs font-mono uppercase tracking-widest text-[#FFB800] font-semibold mb-4">
+              {col.title}
+            </h4>
+            <ul class="space-y-2.5 text-sm text-[#A39E93]">
+              {col.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="hover:text-white transition-colors block py-0.5"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Bottom Disclaimer & Legal Links -->
+    <div
+      class="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#A39E93]"
+    >
+      <p>
+        © 2026 HostAmble Infrastructure Technologies. All rights reserved. Zero external
+        tracking.
+      </p>
+
+      <div class="flex items-center gap-6">
+        <a href="#privacy" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#terms" class="hover:text-white transition-colors">Terms of Service</a>
+        <a href="#refund" class="hover:text-white transition-colors">Refund Policy</a>
+        <a href="#security" class="hover:text-white transition-colors"
+          >Security Standards</a
+        >
+      </div>
+    </div>
+  </Container>
+</footer>

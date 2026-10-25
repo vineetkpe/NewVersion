@@ -1,0 +1,108 @@
+---
+import {
+  SUPPORTED_CURRENCIES,
+  SUPPORTED_CURRENCY_CODES,
+  DEFAULT_CURRENCY,
+} from '../../data/currencies';
+import type { CurrencyCode } from '../../lib/currency/types';
+
+interface Props {
+  readonly id?: string;
+  readonly class?: string;
+  readonly defaultCurrency?: CurrencyCode;
+}
+
+const {
+  id = 'hostamble-currency-selector',
+  class: className = '',
+  defaultCurrency = DEFAULT_CURRENCY,
+} = Astro.props;
+
+const currencies = SUPPORTED_CURRENCY_CODES.map((code) => SUPPORTED_CURRENCIES[code]);
+---
+
+<div class:list={['relative inline-flex items-center text-sm', className]}>
+  <label for={id} class="sr-only">Select billing currency</label>
+  <div class="relative flex items-center">
+    <select
+      id={id}
+      data-currency-selector
+      aria-label="Select billing currency"
+      class="appearance-none bg-white hover:bg-[#FFF1CC] text-[#15130F] font-medium text-xs sm:text-sm pl-3 pr-8 py-1.5 border border-[#E8E3D8] rounded-md transition-colors focus-visible:outline-[#FFB800] cursor-pointer select-none shadow-sm"
+    >
+      {
+        currencies.map((curr) => (
+          <option value={curr.code} selected={curr.code === defaultCurrency}>
+            {curr.code} ({curr.symbol})
+          </option>
+        ))
+      }
+    </select>
+    <div
+      class="pointer-events-none absolute right-2 flex items-center text-text-secondary"
+      aria-hidden="true"
+    >
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+  import {
+    CURRENCY_CHANGE_EVENT,
+    getSavedCurrencyPreference,
+    setSavedCurrencyPreference,
+  } from '../../lib/currency/preferences';
+  import { isSupportedCurrency } from '../../data/currencies';
+  import type { CurrencyCode } from '../../lib/currency/types';
+
+  function initCurrencySelectors() {
+    const selectors = document.querySelectorAll<HTMLSelectElement>(
+      '[data-currency-selector]'
+    );
+    if (!selectors.length) return;
+
+    // 1. Read stored preference
+    const pref = getSavedCurrencyPreference();
+    selectors.forEach((select) => {
+      if (select.value !== pref.currency) {
+        select.value = pref.currency;
+      }
+
+      select.addEventListener('change', (e) => {
+        const target = e.target as HTMLSelectElement;
+        const newCurrency = target.value;
+        if (isSupportedCurrency(newCurrency)) {
+          setSavedCurrencyPreference(newCurrency);
+        }
+      });
+    });
+
+    // 2. Synchronize all selectors if one changes
+    window.addEventListener(CURRENCY_CHANGE_EVENT, (e: Event) => {
+      const customEvent = e as CustomEvent<{ currency: CurrencyCode }>;
+      const current = customEvent.detail?.currency;
+      if (!current) return;
+
+      selectors.forEach((select) => {
+        if (select.value !== current) {
+          select.value = current;
+        }
+      });
+    });
+  }
+
+  // Initialize on DOM load and Astro page transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCurrencySelectors);
+  } else {
+    initCurrencySelectors();
+  }
+  document.addEventListener('astro:page-load', initCurrencySelectors);
+</script>

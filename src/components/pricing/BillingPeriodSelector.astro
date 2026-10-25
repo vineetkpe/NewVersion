@@ -1,0 +1,93 @@
+---
+import type { BillingPeriod } from '../../lib/pricing/types';
+import { BILLING_PERIOD_LABELS } from '../../lib/pricing/types';
+
+interface Props {
+  readonly supportedPeriods?: readonly BillingPeriod[];
+  readonly defaultPeriod?: BillingPeriod;
+  readonly class?: string;
+  readonly targetGroup?: string;
+}
+
+const {
+  supportedPeriods = ['monthly', 'annual'],
+  defaultPeriod = 'monthly',
+  class: className = '',
+  targetGroup = 'default',
+} = Astro.props;
+---
+
+<div
+  role="tablist"
+  aria-label="Billing frequency"
+  data-billing-selector
+  data-target-group={targetGroup}
+  class:list={[
+    'inline-flex items-center p-1 bg-surface-subtle border border-surface-border rounded',
+    className,
+  ]}
+>
+  {
+    supportedPeriods.map((period) => (
+      <button
+        type="button"
+        role="tab"
+        data-period={period}
+        aria-selected={period === defaultPeriod ? 'true' : 'false'}
+        class:list={[
+          'px-4 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors duration-150 focus-visible:outline-brand-primary cursor-pointer select-none',
+          period === defaultPeriod
+            ? 'bg-white text-text-dark shadow-subtle border border-surface-border font-semibold'
+            : 'text-text-secondary hover:text-text-dark bg-transparent border border-transparent',
+        ]}
+      >
+        {BILLING_PERIOD_LABELS[period]}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  function initBillingSelectors() {
+    const containers = document.querySelectorAll<HTMLElement>('[data-billing-selector]');
+
+    containers.forEach((container) => {
+      const targetGroup = container.getAttribute('data-target-group') || 'default';
+      const buttons = container.querySelectorAll<HTMLButtonElement>('[data-period]');
+
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const selectedPeriod = btn.getAttribute('data-period');
+          if (!selectedPeriod) return;
+
+          // Update active state in tabs
+          buttons.forEach((b) => {
+            const isMatch = b.getAttribute('data-period') === selectedPeriod;
+            b.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+            if (isMatch) {
+              b.className =
+                'px-4 py-1.5 text-xs sm:text-sm font-semibold rounded bg-white text-text-dark shadow-subtle border border-surface-border cursor-pointer select-none';
+            } else {
+              b.className =
+                'px-4 py-1.5 text-xs sm:text-sm font-medium rounded text-text-secondary hover:text-text-dark bg-transparent border border-transparent cursor-pointer select-none';
+            }
+          });
+
+          // Dispatch custom event for plan cards
+          const event = new CustomEvent('hostamble:period-change', {
+            detail: { period: selectedPeriod, group: targetGroup },
+            bubbles: true,
+          });
+          window.dispatchEvent(event);
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBillingSelectors);
+  } else {
+    initBillingSelectors();
+  }
+  document.addEventListener('astro:page-load', initBillingSelectors);
+</script>

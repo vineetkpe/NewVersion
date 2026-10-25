@@ -1,0 +1,24 @@
+---
+type ContainerSize = 'default' | 'narrow' | 'wide' | 'full';
+
+interface Props {
+  readonly class?: string;
+  readonly as?: 'div' | 'section' | 'article' | 'main' | 'header' | 'footer';
+  readonly size?: ContainerSize;
+}
+
+const { class: className = '', as: Tag = 'div', size = 'default' }: Props = Astro.props;
+
+const sizeClasses: Record<ContainerSize, string> = {
+  narrow: 'max-w-4xl',
+  default: 'max-w-[1240px]',
+  wide: 'max-w-7xl',
+  full: 'max-w-full',
+};
+---
+
+<Tag
+  class:list={['w-full mx-auto px-6 sm:px-8', sizeClasses[size ?? 'default'], className]}
+>
+  <slot />
+</Tag>

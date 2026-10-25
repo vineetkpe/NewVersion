@@ -1,0 +1,35 @@
+---
+import { PRIMARY_NAVIGATION } from '../../data/site';
+
+interface Props {
+  readonly currentPath?: string;
+  readonly class?: string;
+}
+
+const { currentPath = '/', class: className = '' } = Astro.props;
+---
+
+<nav
+  aria-label="Primary Navigation"
+  class:list={['hidden md:flex items-center gap-1 lg:gap-2', className]}
+>
+  {
+    PRIMARY_NAVIGATION.map((item) => {
+      const isActive = currentPath === item.href;
+      return (
+        <a
+          href={item.href}
+          class:list={[
+            'px-3 py-1.5 text-sm font-medium rounded transition-colors duration-150 select-none focus-visible:outline-brand-primary',
+            isActive
+              ? 'text-brand-primary bg-brand-lavender font-semibold'
+              : 'text-text-dark hover:text-brand-primary hover:bg-surface-subtle',
+          ]}
+          aria-current={isActive ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      );
+    })
+  }
+</nav>

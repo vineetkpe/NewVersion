@@ -1,0 +1,54 @@
+---
+interface Props {
+  readonly variant?: 'brand' | 'neutral' | 'success' | 'warning' | 'pill';
+  readonly size?: 'sm' | 'md';
+  readonly class?: string;
+  readonly hasDot?: boolean;
+  readonly dotColor?: 'green' | 'blue';
+}
+
+const {
+  variant = 'brand',
+  size = 'md',
+  class: className = '',
+  hasDot = false,
+  dotColor = 'blue',
+} = Astro.props;
+
+const variantStyles = {
+  brand:
+    'bg-[#FFF1CC] text-[#15130F] border border-[#FFB800] font-display font-semibold tracking-[0.08em] uppercase',
+  neutral: 'bg-[#FBF9F4] text-[#605A50] border border-[#E8E3D8] font-sans font-medium',
+  success: 'bg-[#F0F8F3] text-[#1E7F52] border border-[#1E7F52]/30 font-sans font-medium',
+  warning: 'bg-[#FFF9ED] text-[#8A5A00] border border-[#8A5A00]/30 font-sans font-medium',
+  pill: 'bg-[#FFFFFF] text-[#605A50] border border-[#E8E3D8] rounded-full font-sans font-medium',
+};
+
+const sizeStyles = {
+  sm: 'text-[11px] px-2.5 py-0.5 rounded-md',
+  md: 'text-xs px-3 py-1 rounded-md',
+};
+
+const dotColors = {
+  green: 'bg-[#1E7F52]',
+  blue: 'bg-[#FFB800]',
+};
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 select-none',
+    variantStyles[variant],
+    variant === 'pill' ? 'rounded-full' : sizeStyles[size],
+    className,
+  ]}
+>
+  {
+    hasDot && (
+      <span
+        class:list={['w-1.5 h-1.5 rounded-full animate-pulse', dotColors[dotColor]]}
+      />
+    )
+  }
+  <slot />
+</span>

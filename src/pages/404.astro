@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Button from '../components/ui/Button.astro';
+---
+
+<BaseLayout
+  title="Page Not Found (404)"
+  description="The requested page could not be found on HostAmble."
+  noIndex={true}
+>
+  <Container size="narrow" class="py-24 sm:py-32 text-center">
+    <div
+      class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#FFF1CC] text-[#15130F] border border-[#FFB800] text-xs font-mono uppercase tracking-widest font-semibold mb-6"
+    >
+      <span>HTTP 404</span>
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-bold text-text-dark tracking-tight mb-4">
+      Resource Not Located
+    </h1>
+    <p
+      class="text-base sm:text-lg text-text-secondary max-w-md mx-auto leading-relaxed mb-8"
+    >
+      The route you requested does not exist or has been relocated within the HostAmble
+      architecture.
+    </p>
+    <div class="flex items-center justify-center gap-4">
+      <Button href="/" variant="primary" size="md"> Return to Home </Button>
+      <Button href="/#pricing" variant="outline" size="md"> Explore Plans </Button>
+    </div>
+  </Container>
+</BaseLayout>

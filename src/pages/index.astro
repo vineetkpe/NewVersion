@@ -1,0 +1,1100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import Accordion from '../components/ui/Accordion.astro';
+import HeroVisual from '../components/ui/HeroVisual.astro';
+import { PRODUCTS_BY_ID } from '../data/products';
+import { lookupProductPrice } from '../lib/pricing/lookup';
+import { DEFAULT_CURRENCY, SUPPORTED_CURRENCY_CODES } from '../data/currencies';
+import type { BillingPeriod } from '../lib/pricing/types';
+
+// The 4 Core Featured Plans for the Homepage Pricing Table
+const featuredPlanIds = ['personal', 'starter', 'pro-web', 'business'];
+const featuredPlans = featuredPlanIds.map((id) => PRODUCTS_BY_ID[id]!);
+
+// Build serializable price matrix for all 4 plans
+const planMatrices: Record<
+  string,
+  Record<
+    string,
+    Record<
+      BillingPeriod,
+      {
+        formattedMonthlyEquivalent: string;
+        formattedTotal: string;
+        isAvailable: boolean;
+        periodSuffix: string;
+      }
+    >
+  >
+> = {};
+
+for (const plan of featuredPlans) {
+  planMatrices[plan.id] = {};
+  for (const cur of SUPPORTED_CURRENCY_CODES) {
+    planMatrices[plan.id]![cur] = {
+      monthly: {
+        formattedMonthlyEquivalent: '',
+        formattedTotal: '',
+        isAvailable: false,
+        periodSuffix: '/mo',
+      },
+      quarterly: {
+        formattedMonthlyEquivalent: '',
+        formattedTotal: '',
+        isAvailable: false,
+        periodSuffix: '/mo',
+      },
+      semiannual: {
+        formattedMonthlyEquivalent: '',
+        formattedTotal: '',
+        isAvailable: false,
+        periodSuffix: '/mo',
+      },
+      annual: {
+        formattedMonthlyEquivalent: '',
+        formattedTotal: '',
+        isAvailable: false,
+        periodSuffix: '/mo',
+      },
+    };
+
+    for (const period of plan.supportedBillingPeriods) {
+      const lookup = lookupProductPrice(plan, cur, period);
+      if (lookup.isAvailable) {
+        let divisor = 1;
+        if (period === 'annual') divisor = 12;
+        else if (period === 'quarterly') divisor = 3;
+        else if (period === 'semiannual') divisor = 6;
+
+        const monthlyEquivalentMinor = Math.round(lookup.amountMinor / divisor);
+        const equivalentLookup = lookupProductPrice(
+          {
+            ...plan,
+            prices: { [cur]: { monthly: monthlyEquivalentMinor } },
+          },
+          cur,
+          'monthly'
+        );
+
+        planMatrices[plan.id]![cur]![period] = {
+          formattedMonthlyEquivalent: equivalentLookup.formatted,
+          formattedTotal: lookup.formatted,
+          isAvailable: true,
+          periodSuffix: '/mo',
+        };
+      }
+    }
+  }
+}
+---
+
+<BaseLayout
+  title="HostAmble — Calm infrastructure. Serious performance."
+  description="High-performance NVMe web hosting, managed WordPress, and cloud infrastructure engineered for developers, agencies, and businesses with transparent pricing."
+>
+  <!-- 1. HERO SECTION (Architectural Dynamic Mesh with Paper, Stone & Marigold) -->
+  <section class="relative pt-12 pb-20 sm:pt-16 sm:pb-28 bg-mesh-hero overflow-hidden border-b border-[#E8E3D8]">
+    <!-- Ambient subtle illumination spots (Strictly Marigold Soft #FFF1CC & Paper) -->
+    <div class="pointer-events-none absolute -top-24 -left-20 w-96 h-96 rounded-full bg-[#FFF1CC]/60 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute top-1/3 -right-20 w-96 h-96 rounded-full bg-[#E8E3D8]/40 blur-3xl" aria-hidden="true"></div>
+
+    <Container class="relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <!-- Left Hero Copy -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Infrastructure Status Placard -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 border border-[#E8E3D8] text-xs sm:text-sm font-medium text-[#15130F] shadow-subtle">
+            <span class="w-2 h-2 rounded-full bg-[#1E7F52]"></span>
+            <span class="font-display font-semibold uppercase tracking-[0.08em] text-[11px] sm:text-xs text-[#15130F]">TIER-3+ CLOUD FABRIC</span>
+            <span class="text-[#605A50]">•</span>
+            <span class="text-[#605A50] font-sans text-xs">99.9% Verified Uptime SLA</span>
+          </div>
+
+          <!-- Main Headline in Space Grotesk -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#15130F] font-display leading-[1.1]">
+            Calm infrastructure.<br />Serious performance.
+          </h1>
+
+          <!-- Concrete Subtitle (No AI Slop) -->
+          <p class="text-lg sm:text-xl text-[#605A50] font-sans leading-relaxed max-w-xl">
+            Isolated NVMe cloud compute, automated daily snapshots, and tier-3+ redundancy. Engineered for developers, agencies, and production platforms.
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <Button href="#pricing" variant="primary" size="lg" class="shadow-card">
+              View Hosting Plans &rarr;
+            </Button>
+            <Button href="#hosting-models" variant="secondary" size="lg">
+              Explore Server Architecture
+            </Button>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="pt-4 flex flex-wrap items-center gap-6 text-xs sm:text-sm text-[#605A50] font-medium font-sans">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#1E7F52]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span>99.9% Uptime SLA</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#1E7F52]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span>Free SSL & DNS Wizard</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-[#1E7F52]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              <span>24/7 Engineer Support</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Visual -->
+        <div class="lg:col-span-5">
+          <HeroVisual />
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 2. DOMAIN SEARCH SECTION (Mesh Ambient Pattern with Marigold Soft) -->
+  <section id="domain-search" class="py-16 sm:py-20 bg-mesh-domain border-b border-[#E8E3D8] relative">
+    <Container>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/95 backdrop-blur-md p-8 sm:p-10 rounded-2xl border border-[#E8E3D8] shadow-elevated">
+        <!-- Left Domain Title -->
+        <div class="lg:col-span-5 space-y-4">
+          <Badge variant="brand" size="sm">
+            DOMAIN REGISTRATION
+          </Badge>
+          <h2 class="text-2xl sm:text-3xl font-bold text-[#15130F] font-display tracking-tight">
+            Claim and secure your domain.
+          </h2>
+          <p class="text-sm text-[#605A50] leading-relaxed font-sans">
+            Domain registration with transparent annual renewals, instant DNS propagation, and free WHOIS privacy protection.
+          </p>
+          <a
+            href="#pricing"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#15130F] hover:text-[#E6A500] font-sans"
+          >
+            <span>Explore domain extensions & transfers</span>
+            <span>&rarr;</span>
+          </a>
+
+          <!-- Privacy Shield Card -->
+          <div class="pt-2">
+            <div class="p-3.5 bg-[#FBF9F4] rounded-xl border border-[#E8E3D8] flex items-start gap-3 shadow-subtle">
+              <svg class="w-5 h-5 text-[#FFB800] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <div>
+                <p class="text-xs font-semibold text-[#15130F] font-sans">Free WHOIS Privacy Protection</p>
+                <p class="text-[11px] text-[#605A50]">Mask your personal identity and phone from public lookup databases at no cost.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Monolithic Domain Search Box -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-[#FFF1CC]/90 p-2.5 sm:p-3 rounded-2xl border border-[#FFB800]/50 shadow-card">
+            <form
+              id="domain-search-form"
+              class="flex flex-col sm:flex-row items-stretch gap-2 bg-white p-1.5 rounded-xl border border-[#E8E3D8]"
+            >
+              <div class="relative flex-1">
+                <input
+                  type="text"
+                  id="domain-input"
+                  required
+                  placeholder="Find your domain name (e.g. yourbrand.com)"
+                  class="w-full pl-4 pr-3 py-3 text-sm text-[#15130F] placeholder-[#605A50]/70 bg-transparent border-none rounded-lg focus:outline-none"
+                />
+              </div>
+              <div class="flex items-center gap-1.5">
+                <select
+                  aria-label="Domain extension"
+                  class="px-3 py-2 text-sm font-semibold text-[#15130F] bg-[#FBF9F4] border border-[#E8E3D8] rounded-lg cursor-pointer focus:outline-none"
+                >
+                  <option value=".com">.com</option>
+                  <option value=".in">.in</option>
+                  <option value=".io">.io</option>
+                  <option value=".net">.net</option>
+                  <option value=".org">.org</option>
+                </select>
+                <Button type="submit" variant="primary" size="md" class="py-3 px-6 whitespace-nowrap">
+                  Search Domain
+                </Button>
+              </div>
+            </form>
+
+            <div id="domain-status-msg" class="hidden mt-3 p-3 bg-white border border-[#E8E3D8] rounded-lg text-xs text-[#15130F] flex items-center justify-between">
+              <span>Domain lookup ready. Connect your approved registrar when configured.</span>
+              <button type="button" id="domain-status-close" class="text-[#15130F] font-bold ml-2">×</button>
+            </div>
+          </div>
+
+          <!-- Popular TLD Pricing Badges -->
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <span class="text-xs font-medium text-[#605A50] font-sans">
+              Popular extensions right now:
+            </span>
+            <div class="flex items-center gap-3">
+              <div class="px-3.5 py-1.5 rounded-lg bg-white border border-[#E8E3D8] text-center shadow-subtle hover:border-[#FFB800] transition-colors">
+                <span class="text-xs font-bold text-[#15130F] block font-mono">.in</span>
+                <span class="text-[11px] text-[#605A50]" data-tld-price="in">₹399/yr</span>
+              </div>
+              <div class="px-3.5 py-1.5 rounded-lg bg-white border border-[#E8E3D8] text-center shadow-subtle hover:border-[#FFB800] transition-colors">
+                <span class="text-xs font-bold text-[#15130F] block font-mono">.com</span>
+                <span class="text-[11px] text-[#605A50]" data-tld-price="com">₹799/yr</span>
+              </div>
+              <div class="px-3.5 py-1.5 rounded-lg bg-white border border-[#E8E3D8] text-center shadow-subtle hover:border-[#FFB800] transition-colors">
+                <span class="text-xs font-bold text-[#15130F] block font-mono">.io</span>
+                <span class="text-[11px] text-[#605A50]" data-tld-price="io">₹2,699/yr</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 3. HOSTING MODELS SECTION (Dynamic Pattern Background) -->
+  <section id="hosting-models" class="py-20 sm:py-24 bg-mesh-services border-b border-[#E8E3D8] relative">
+    <Container>
+      <div class="max-w-2xl mb-14">
+        <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight mb-3">
+          Hosting that fits the way you build.
+        </h2>
+        <p class="text-base sm:text-lg text-[#605A50] font-sans leading-relaxed">
+          From personal sites to scalable web platforms, pick the hosting model tailored to your needs.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Model 1: Shared Hosting -->
+        <div class="p-8 rounded-2xl border border-[#E8E3D8] hover:border-[#FFB800] transition-all duration-200 bg-white/95 backdrop-blur-sm hover:shadow-card flex flex-col justify-between">
+          <div class="space-y-3">
+            <h3 class="text-xl font-bold text-[#15130F] font-display">Shared Hosting</h3>
+            <p class="text-sm text-[#605A50] leading-relaxed font-sans">
+              Dependable, cost-effective performance for sites and blogs. Set up in minutes with unmetered NVMe storage and dedicated support.
+            </p>
+          </div>
+          <div class="pt-6 mt-6 border-t border-[#E8E3D8] flex items-center justify-between">
+            <span class="text-xs font-medium text-[#605A50]">
+              From <strong class="text-[#15130F] font-bold">₹199 /month</strong> (renews at same rate)
+            </span>
+            <a href="#pricing" class="text-sm font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 font-sans">
+              <span>Explore Shared</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Model 2: WordPress Hosting -->
+        <div class="p-8 rounded-2xl border border-[#E8E3D8] hover:border-[#FFB800] transition-all duration-200 bg-white/95 backdrop-blur-sm hover:shadow-card flex flex-col justify-between">
+          <div class="space-y-3">
+            <h3 class="text-xl font-bold text-[#15130F] font-display">WordPress Hosting</h3>
+            <p class="text-sm text-[#605A50] leading-relaxed font-sans">
+              Speed and reliability for WordPress. Pre-configured caching, automatic core updates, and staging tools for developers.
+            </p>
+          </div>
+          <div class="pt-6 mt-6 border-t border-[#E8E3D8] flex items-center justify-between">
+            <span class="text-xs font-medium text-[#605A50]">
+              From <strong class="text-[#15130F] font-bold">₹349 /month</strong> (renews at same rate)
+            </span>
+            <a href="#pricing" class="text-sm font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 font-sans">
+              <span>Explore WordPress</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Model 3: Cloud Hosting -->
+        <div class="p-8 rounded-2xl border border-[#E8E3D8] hover:border-[#FFB800] transition-all duration-200 bg-white/95 backdrop-blur-sm hover:shadow-card flex flex-col justify-between">
+          <div class="space-y-3">
+            <h3 class="text-xl font-bold text-[#15130F] font-display">Cloud Hosting</h3>
+            <p class="text-sm text-[#605A50] leading-relaxed font-sans">
+              Dedicated compute slices with isolated vCPUs, guaranteed RAM, and instant scalability for fast-growing web apps.
+            </p>
+          </div>
+          <div class="pt-6 mt-6 border-t border-[#E8E3D8] flex items-center justify-between">
+            <span class="text-xs font-medium text-[#605A50]">
+              From <strong class="text-[#15130F] font-bold">₹999 /month</strong> (renews at same rate)
+            </span>
+            <a href="#pricing" class="text-sm font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 font-sans">
+              <span>Explore Cloud</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Model 4: Reseller Hosting -->
+        <div class="p-8 rounded-2xl border border-[#E8E3D8] hover:border-[#FFB800] transition-all duration-200 bg-white/95 backdrop-blur-sm hover:shadow-card flex flex-col justify-between">
+          <div class="space-y-3">
+            <h3 class="text-xl font-bold text-[#15130F] font-display">Reseller Hosting</h3>
+            <p class="text-sm text-[#605A50] leading-relaxed font-sans">
+              White-label infrastructure with WHM client management. Divide and allocate resources, control pricing, and scale your brand.
+            </p>
+          </div>
+          <div class="pt-6 mt-6 border-t border-[#E8E3D8] flex items-center justify-between">
+            <span class="text-xs font-medium text-[#605A50]">
+              From <strong class="text-[#15130F] font-bold">₹1,899 /month</strong> (renews at same rate)
+            </span>
+            <a href="#pricing" class="text-sm font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 font-sans">
+              <span>Explore Reseller</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 4. TRANSPARENT PRICING SECTION (Architectural Dynamic Mesh Pattern) -->
+  <section id="pricing" class="py-20 sm:py-28 bg-mesh-pricing border-b border-[#E8E3D8] relative">
+    <Container class="relative z-10">
+      <!-- Section Header -->
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <Badge variant="brand" size="sm" class="mb-3">
+          TRANSPARENT PRICING
+        </Badge>
+        <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight mb-3">
+          Start with what you need.<br />Upgrade when you're ready.
+        </h2>
+        <p class="text-sm sm:text-base text-[#605A50] font-sans">
+          No surprise price hikes at renewal. What you see is what you pay, period.
+        </p>
+
+        <!-- Billing Period Selector Tabs -->
+        <div class="mt-8 inline-flex items-center p-1.5 bg-white/95 backdrop-blur-sm border border-[#E8E3D8] rounded-xl shadow-subtle">
+          <button
+            type="button"
+            data-billing-tab="monthly"
+            class="billing-tab px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all text-[#605A50] hover:text-[#15130F]"
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            data-billing-tab="quarterly"
+            class="billing-tab px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all text-[#605A50] hover:text-[#15130F]"
+          >
+            Quarterly
+          </button>
+          <button
+            type="button"
+            data-billing-tab="semiannual"
+            class="billing-tab px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all text-[#605A50] hover:text-[#15130F]"
+          >
+            Semi-Annual
+          </button>
+          <button
+            type="button"
+            data-billing-tab="annual"
+            class="billing-tab active px-4 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all bg-[#FFB800] text-[#15130F] shadow-sm"
+          >
+            Annual (Save 20%)
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Plan Cards in a 4-Column Responsive Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch" id="pricing-cards-container">
+        {
+          featuredPlans.map((plan) => {
+            const isFeatured = plan.id === 'pro-web';
+            return (
+              <div
+                class:list={[
+                  'relative rounded-2xl bg-white/95 backdrop-blur-sm p-6 sm:p-7 flex flex-col justify-between transition-all duration-200',
+                  isFeatured
+                    ? 'border-2 border-[#FFB800] shadow-elevated ring-1 ring-[#FFB800]'
+                    : 'border border-[#E8E3D8] hover:border-[#FFB800] shadow-card',
+                ]}
+                data-plan-card={plan.id}
+                data-plan-matrix={JSON.stringify(planMatrices[plan.id])}
+              >
+                {/* Top Badge for Featured */}
+                {isFeatured && (
+                  <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-[#FFB800] text-[#15130F] text-[11px] font-display uppercase font-bold tracking-[0.08em] shadow-sm">
+                    RECOMMENDED
+                  </div>
+                )}
+
+                <div>
+                  <h3 class="text-xl font-bold text-[#15130F] font-display tracking-tight mb-1">
+                    {plan.name}
+                  </h3>
+                  <p class="text-xs text-[#605A50] font-sans mb-6 min-h-[32px]">
+                    {plan.tagline}
+                  </p>
+
+                  {/* Pricing Display */}
+                  <div class="pb-6 mb-6 border-b border-[#E8E3D8]">
+                    <div class="flex items-baseline gap-1">
+                      <span
+                        class="text-3xl sm:text-4xl font-extrabold text-[#15130F] font-display tracking-tight"
+                        data-display-price={plan.id}
+                      >
+                        {planMatrices[plan.id]?.[DEFAULT_CURRENCY]?.annual?.formattedMonthlyEquivalent || '—'}
+                      </span>
+                      <span class="text-xs text-[#605A50] font-medium" data-display-suffix={plan.id}>
+                        /mo
+                      </span>
+                    </div>
+
+                    <p class="text-[11px] text-[#605A50] mt-1" data-display-terms={plan.id}>
+                      Billed annually (renews at same rate)
+                    </p>
+                  </div>
+
+                  {/* Features List */}
+                  <div class="space-y-3 mb-8">
+                    <p class="text-[11px] font-display uppercase tracking-[0.08em] text-[#605A50] font-semibold">
+                      Plan Includes
+                    </p>
+                    <ul class="space-y-2.5 text-xs text-[#15130F] font-sans">
+                      {plan.features.map((feature) => (
+                        <li class="flex items-center gap-2">
+                          <svg class="w-4 h-4 text-[#1E7F52] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                          </svg>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Bottom CTA */}
+                <div>
+                  <Button
+                    href="#login"
+                    variant={isFeatured ? 'primary' : 'secondary'}
+                    size="md"
+                    class="w-full"
+                  >
+                    Choose {plan.name}
+                  </Button>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+
+      <!-- Money-back guarantee disclaimer below cards -->
+      <p class="text-center text-xs text-[#605A50] mt-10 font-sans">
+        * All plans backed by our 30-day money-back guarantee. Zero hidden setup fees, automatic instant provisioning.
+      </p>
+    </Container>
+  </section>
+
+  <!-- 5. CONTROL PANEL MOCKUP SECTION ("Everything you need to manage your website.") -->
+  <section id="control-panel" class="py-20 sm:py-28 bg-white border-b border-[#E8E3D8] relative overflow-hidden">
+    <!-- Ambient background light -->
+    <div class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-[#FFF1CC]/40 blur-3xl" aria-hidden="true"></div>
+
+    <Container class="relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <Badge variant="brand" size="sm" class="mb-3">
+          CONTROL PANEL
+        </Badge>
+        <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight mb-3">
+          Everything you need to manage your website.
+        </h2>
+        <p class="text-base text-[#605A50] font-sans">
+          A fast, modern dashboard designed to keep you in control without the clutter.
+        </p>
+      </div>
+
+      <!-- High-Fidelity Architectural Console UI Mockup -->
+      <div class="max-w-4xl mx-auto rounded-2xl bg-white border border-[#E8E3D8] shadow-elevated overflow-hidden">
+        <!-- Window Title Bar -->
+        <div class="bg-[#15130F] px-6 py-4 flex items-center justify-between text-xs text-white">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#E8E3D8]/50"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-[#605A50]/70"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-[#FFB800]/80"></span>
+            </div>
+            <span class="font-display font-semibold text-xs tracking-wider text-[#E8E3D8]">HOSTAMBLE CLOUD CONSOLE</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#1E7F52]"></span>
+            <span class="text-[11px] text-[#E8E3D8] font-mono">All Systems Normal</span>
+          </div>
+        </div>
+
+        <!-- Inner Dashboard Grid -->
+        <div class="p-6 sm:p-8 bg-[#FBF9F4] grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Card 1: Domain & Nameservers -->
+          <div class="p-5 rounded-xl bg-white border border-[#E8E3D8] space-y-3 shadow-subtle">
+            <span class="text-[11px] font-display uppercase tracking-[0.08em] text-[#605A50] block">
+              Domain Overview
+            </span>
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm text-[#15130F] font-mono">yourbrand.com</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#F0F8F3] text-[#1E7F52] border border-[#1E7F52]/30">
+                ACTIVE
+              </span>
+            </div>
+            <div class="text-xs text-[#605A50] space-y-1.5 pt-2 border-t border-[#E8E3D8]">
+              <div class="flex justify-between">
+                <span>Nameserver 1:</span>
+                <span class="font-mono text-[#15130F]">ns1.hostamble.com</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Nameserver 2:</span>
+                <span class="font-mono text-[#15130F]">ns2.hostamble.com</span>
+              </div>
+              <div class="flex justify-between">
+                <span>SSL Status:</span>
+                <span class="text-[#1E7F52] font-semibold">Let’s Encrypt Active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Resource Utilization (Telemetry card with inset 2px top border) -->
+          <div class="p-5 rounded-xl bg-white border border-[#E8E3D8] border-t-2 border-t-[#FFB800] space-y-3 shadow-subtle">
+            <span class="text-[11px] font-display uppercase tracking-[0.08em] text-[#605A50] block">
+              Resource Utilization
+            </span>
+            <div class="space-y-2 text-xs">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>NVMe Storage:</span>
+                  <span class="font-bold text-[#15130F] font-mono">14.2 GB / 50 GB</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#E8E3D8] rounded-full overflow-hidden">
+                  <div class="w-[28%] h-full bg-[#FFB800] rounded-full"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span>Bandwidth:</span>
+                  <span class="font-bold text-[#15130F] font-mono">128 GB / Unmetered</span>
+                </div>
+                <div class="w-full h-1.5 bg-[#E8E3D8] rounded-full overflow-hidden">
+                  <div class="w-[12%] h-full bg-[#1E7F52] rounded-full"></div>
+                </div>
+              </div>
+              <div class="flex justify-between pt-1">
+                <span>PHP Version:</span>
+                <span class="font-mono text-[#15130F] font-semibold">8.3 (OPcache Active)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Quick Administrative Tools -->
+          <div class="p-5 rounded-xl bg-white border border-[#E8E3D8] space-y-3 shadow-subtle">
+            <span class="text-[11px] font-display uppercase tracking-[0.08em] text-[#605A50] block">
+              Quick Actions
+            </span>
+            <div class="space-y-1.5 text-xs font-medium text-[#15130F]">
+              <div class="p-2.5 rounded-lg bg-[#FBF9F4] hover:bg-[#FFF1CC] cursor-pointer flex items-center justify-between transition-colors">
+                <span>Open File Manager</span>
+                <span class="text-[#FFB800] font-bold">&rarr;</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#FBF9F4] hover:bg-[#FFF1CC] cursor-pointer flex items-center justify-between transition-colors">
+                <span>Manage Databases (MySQL)</span>
+                <span class="text-[#FFB800] font-bold">&rarr;</span>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#FBF9F4] hover:bg-[#FFF1CC] cursor-pointer flex items-center justify-between transition-colors">
+                <span>1-Click App Installer</span>
+                <span class="text-[#FFB800] font-bold">&rarr;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Feature Points Below Mockup -->
+        <div class="px-6 sm:px-8 py-6 bg-white border-t border-[#E8E3D8] grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-[#605A50]">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              ⚡
+            </div>
+            <div>
+              <p class="font-semibold text-[#15130F]">Instant Provisioning</p>
+              <p>Accounts live in 60 seconds.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🔄
+            </div>
+            <div>
+              <p class="font-semibold text-[#15130F]">One-Click App Installs</p>
+              <p>Deploy WordPress, Ghost, or Node.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🛡️
+            </div>
+            <div>
+              <p class="font-semibold text-[#15130F]">Effortless Migrations</p>
+              <p>Free zero-downtime transfers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 6. ENTERPRISE FUNDAMENTALS ("Hosting built on rock-solid fundamentals, not gimmicky buzzwords.") -->
+  <section id="fundamentals" class="py-20 sm:py-28 bg-mesh-subtle border-b border-[#E8E3D8]">
+    <Container>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <!-- Left Sticky Column -->
+        <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-28">
+          <Badge variant="brand" size="sm">
+            THE HOSTAMBLE DIFFERENCE
+          </Badge>
+          <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight leading-tight">
+            Hosting built on rock-solid fundamentals, not gimmicky buzzwords.
+          </h2>
+          <p class="text-sm sm:text-base text-[#605A50] leading-relaxed font-sans">
+            Every server we run is built with enterprise hardware, NVMe storage pools, and redundant power. We guarantee consistent performance, latency parity, and true peace of mind.
+          </p>
+          <div class="pt-4">
+            <div class="p-4 rounded-xl bg-white border border-[#E8E3D8] shadow-subtle">
+              <span class="text-[11px] font-display uppercase tracking-[0.08em] text-[#605A50] block mb-1">
+                Enterprise Node Specifications
+              </span>
+              <p class="text-xs text-[#15130F] font-medium font-sans">
+                AMD EPYC™ 9004 Series • DDR5 ECC RAM • Pure PCIe Gen4 NVMe Pools
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 6 Feature Pillars -->
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              💾
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Pure NVMe Storage</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Engineered on enterprise PCIe Gen4 NVMe drives, delivering up to 10x faster database queries and page loads.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🌐
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Unmetered Bandwidth</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Enjoy unmetered bandwidth on all shared and cloud nodes, with no hidden bandwidth penalties or surprise bills.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              📍
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Global Datacenters</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Deploy close to your visitors with modern tier-3+ datacenters across North America, Europe, and Asia-Pacific.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🏷️
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Predictable Pricing</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              No 300% renewal price spikes. Our transparent pricing structure is predictable year after year.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🤝
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Real Human Support</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Direct connection to server administrators and technical engineers, available round-the-clock via ticket and chat.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-white border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-[#FFF1CC] text-[#15130F] flex items-center justify-center font-bold text-sm">
+              🔒
+            </div>
+            <h4 class="text-base font-bold text-[#15130F] font-display">Daily Off-Site Backups</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Automated snapshot protection with 30-day retention. Restore full files or single databases in one click.
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 7. PHOTOGRAPHIC BANNER SECTION ("Built for how you build.") -->
+  <section id="creator-banner" class="py-20 sm:py-28 bg-white border-b border-[#E8E3D8]">
+    <Container>
+      <!-- Hero Photo Banner with Real Uploaded Image -->
+      <div class="relative rounded-2xl overflow-hidden border border-[#E8E3D8] shadow-elevated mb-12">
+        <div class="aspect-[16/8] sm:aspect-[21/9] w-full max-h-[480px] overflow-hidden">
+          <img
+            src="/images/creator-desk.jpg"
+            alt="Developer designing websites with HostAmble infrastructure"
+            class="w-full h-full object-cover object-center"
+            loading="lazy"
+          />
+        </div>
+        <!-- Gradient Overlay with Headline -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#15130F]/95 via-[#15130F]/45 to-transparent flex flex-col justify-end p-6 sm:p-12 text-white">
+          <span class="text-xs font-display uppercase tracking-[0.08em] text-[#FFB800] font-semibold mb-2">
+            DESIGNED FOR CREATORS
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-bold font-display tracking-tight mb-2 text-white">
+            Built for how you build.
+          </h2>
+          <p class="text-sm sm:text-base text-[#E8E3D8] font-sans max-w-xl">
+            Whether you're writing code, running an agency, or launching your first online store.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Use Case Cards Below Image -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="p-6 rounded-2xl bg-[#FBF9F4] border border-[#E8E3D8] hover:border-[#FFB800] transition-colors space-y-2 flex flex-col justify-between shadow-subtle">
+          <div class="space-y-1">
+            <h4 class="text-base font-bold text-[#15130F] font-display">Personal Websites & Blogs</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Fast personal portfolio and blog hosting with free SSL and automatic updates.
+            </p>
+          </div>
+          <a href="#pricing" class="text-xs font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 pt-3 font-sans">
+            <span>Explore personal hosting</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#FBF9F4] border border-[#E8E3D8] hover:border-[#FFB800] transition-colors space-y-2 flex flex-col justify-between shadow-subtle">
+          <div class="space-y-1">
+            <h4 class="text-base font-bold text-[#15130F] font-display">Small Business Websites</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Reliable commercial uptime, professional business email, and instant customer trust.
+            </p>
+          </div>
+          <a href="#pricing" class="text-xs font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 pt-3 font-sans">
+            <span>Explore business hosting</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#FBF9F4] border border-[#E8E3D8] hover:border-[#FFB800] transition-colors space-y-2 flex flex-col justify-between shadow-subtle">
+          <div class="space-y-1">
+            <h4 class="text-base font-bold text-[#15130F] font-display">WordPress Agencies</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Multiple site management, client staging environments, and automated team access.
+            </p>
+          </div>
+          <a href="#pricing" class="text-xs font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 pt-3 font-sans">
+            <span>Explore agency hosting</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#FBF9F4] border border-[#E8E3D8] hover:border-[#FFB800] transition-colors space-y-2 flex flex-col justify-between shadow-subtle">
+          <div class="space-y-1">
+            <h4 class="text-base font-bold text-[#15130F] font-display">SaaS Platforms</h4>
+            <p class="text-xs text-[#605A50] leading-relaxed font-sans">
+              Scalable cloud slices with root access, predictable network transit, and isolated resources.
+            </p>
+          </div>
+          <a href="#pricing" class="text-xs font-semibold text-[#15130F] hover:text-[#E6A500] inline-flex items-center gap-1 pt-3 font-sans">
+            <span>Explore cloud compute</span>
+            <span>&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 8. THREE-STEP ONBOARDING ("From registration to live.") -->
+  <section class="py-20 sm:py-24 bg-mesh-subtle border-b border-[#E8E3D8]">
+    <Container>
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <Badge variant="brand" size="sm" class="mb-3">
+          HOW IT WORKS
+        </Badge>
+        <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight">
+          From registration to live.
+        </h2>
+      </div>
+
+      <!-- 3 Steps -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="p-8 rounded-2xl bg-white/95 backdrop-blur-sm border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-4">
+          <span class="text-4xl font-bold text-[#FFB800] font-display block">01</span>
+          <h3 class="text-lg font-bold text-[#15130F] font-display">Choose your hosting plan</h3>
+          <p class="text-xs sm:text-sm text-[#605A50] leading-relaxed font-sans">
+            Select a plan that fits your resource and traffic needs. Upgrade anytime with zero migration friction.
+          </p>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-white/95 backdrop-blur-sm border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-4">
+          <span class="text-4xl font-bold text-[#FFB800] font-display block">02</span>
+          <h3 class="text-lg font-bold text-[#15130F] font-display">Select a domain name</h3>
+          <p class="text-xs sm:text-sm text-[#605A50] leading-relaxed font-sans">
+            Register a new domain or easily point your existing one using our automated nameserver wizard.
+          </p>
+        </div>
+
+        <div class="p-8 rounded-2xl bg-white/95 backdrop-blur-sm border border-[#E8E3D8] hover:border-[#FFB800] transition-colors shadow-subtle space-y-4">
+          <span class="text-4xl font-bold text-[#FFB800] font-display block">03</span>
+          <h3 class="text-lg font-bold text-[#15130F] font-display">Launch your website</h3>
+          <p class="text-xs sm:text-sm text-[#605A50] leading-relaxed font-sans">
+            Install your CMS in 1 click or upload files via SFTP/Git. Your site is live worldwide instantly.
+          </p>
+        </div>
+      </div>
+
+      <!-- 4 Trust Badges in a Row below steps -->
+      <div class="mt-14 pt-8 border-t border-[#E8E3D8] grid grid-cols-2 md:grid-cols-4 gap-6 text-center text-xs">
+        <div>
+          <p class="font-bold text-[#15130F] text-sm font-display">99.9% Uptime SLA</p>
+          <p class="text-[#605A50] mt-0.5">Guaranteed hardware reliability</p>
+        </div>
+        <div>
+          <p class="font-bold text-[#15130F] text-sm font-display">30-Day Money-Back</p>
+          <p class="text-[#605A50] mt-0.5">Zero financial risk</p>
+        </div>
+        <div>
+          <p class="font-bold text-[#15130F] text-sm font-display">100% NVMe Performance</p>
+          <p class="text-[#605A50] mt-0.5">Enterprise PCIe storage</p>
+        </div>
+        <div>
+          <p class="font-bold text-[#15130F] text-sm font-display">24/7/365 Expert Support</p>
+          <p class="text-[#605A50] mt-0.5">Human engineers on standby</p>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 9. FREQUENTLY ASKED QUESTIONS SECTION -->
+  <section id="faq" class="py-20 sm:py-28 bg-white border-b border-[#E8E3D8]">
+    <Container size="narrow">
+      <div class="text-center max-w-xl mx-auto mb-14">
+        <Badge variant="brand" size="sm" class="mb-3">
+          GOT QUESTIONS?
+        </Badge>
+        <h2 class="text-3xl sm:text-4xl font-bold text-[#15130F] font-display tracking-tight">
+          Frequently asked questions.
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        <Accordion title="Which hosting plan should I choose for my new website?" defaultOpen={true}>
+          For personal portfolios, blogs, and landing pages, our <strong>Personal</strong> or <strong>Starter</strong> plan provides ample NVMe storage, unmetered bandwidth, and a free SSL certificate. If you are operating an agency, running multiple WordPress sites, or expecting high traffic, we recommend <strong>Pro Web</strong> for dedicated Redis caching and daily off-site snapshots.
+        </Accordion>
+
+        <Accordion title="Can I transfer my existing website to HostAmble?">
+          Yes! Our engineering team handles site and database migrations free of charge. We migrate your files, MySQL databases, and emails with zero downtime. Simply initiate a migration request upon account activation.
+        </Accordion>
+
+        <Accordion title="Is an SSL certificate included for free?">
+          Yes. Every domain, addon domain, and subdomain hosted on HostAmble receives an automated, auto-renewing Let’s Encrypt SSL certificate configured out-of-the-box.
+        </Accordion>
+
+        <Accordion title="Do you provide email hosting with my custom domain?">
+          Yes. Custom business email mailboxes (e.g. you@yourbrand.com) are included with webmail access, full IMAP/POP3 support, and advanced spam filtering.
+        </Accordion>
+
+        <Accordion title="What happens when my hosting plan renews?">
+          HostAmble believes in honest, transparent pricing. We do not impose 300% renewal rate hikes; your renewal rate matches the transparently declared regular price at signup.
+        </Accordion>
+
+        <Accordion title="How does your technical support team operate?">
+          Our support team is staffed 24/7/365 by experienced server administrators. You can reach our technical desk anytime via support tickets or live chat.
+        </Accordion>
+      </div>
+    </Container>
+  </section>
+
+  <!-- 10. CALL TO ACTION BANNER (Deep Ink Card with Marigold Accents) -->
+  <section class="py-16 sm:py-24 bg-white">
+    <Container>
+      <div class="rounded-3xl bg-[#15130F] border border-[#26231D] p-10 sm:p-16 text-white shadow-elevated flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative overflow-hidden">
+        <!-- Subtle architectural ambient highlight -->
+        <div class="pointer-events-none absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-[#FFB800]/10 blur-2xl" aria-hidden="true"></div>
+
+        <div class="max-w-xl space-y-3 relative z-10">
+          <span class="text-xs font-display uppercase tracking-[0.08em] text-[#FFB800] font-semibold">
+            ENGINEERED HOSTING INFRASTRUCTURE
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white font-display">
+            Calm infrastructure.<br />Serious performance.
+          </h2>
+          <p class="text-sm sm:text-base text-[#E8E3D8] leading-relaxed font-sans">
+            Deploy on isolated NVMe infrastructure with predictable renewal rates, guaranteed 99.9% uptime SLA, and 24/7 technical engineer support.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 relative z-10">
+          <Button href="#pricing" variant="primary" size="lg" class="shadow-card font-bold">
+            View Hosting Plans &rarr;
+          </Button>
+          <Button href="#faq" variant="ghost" size="lg" class="text-[#E8E3D8] hover:text-white hover:bg-white/10 border border-[#E8E3D8]/30 font-semibold">
+            Technical FAQ
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </section>
+</BaseLayout>
+
+<!-- Client Script for Interactive Billing Tabs and Currency Reactivity -->
+<script>
+  import {
+    CURRENCY_CHANGE_EVENT,
+    getSavedCurrencyPreference,
+  } from '../lib/currency/preferences';
+  import type { CurrencyCode } from '../lib/currency/types';
+  import type { BillingPeriod } from '../lib/pricing/types';
+
+  let currentPeriod: BillingPeriod = 'annual';
+
+  function updateAllPlanCards(targetCurrency: CurrencyCode, targetPeriod: BillingPeriod) {
+    const cards = document.querySelectorAll<HTMLElement>('[data-plan-card]');
+
+    cards.forEach((card) => {
+      const planId = card.getAttribute('data-plan-card');
+      const matrixRaw = card.getAttribute('data-plan-matrix');
+      if (!planId || !matrixRaw) return;
+
+      try {
+        const matrix = JSON.parse(matrixRaw);
+        const curData = matrix[targetCurrency];
+        const periodData = curData ? curData[targetPeriod] : undefined;
+
+        const priceEl = card.querySelector<HTMLElement>(`[data-display-price="${planId}"]`);
+        const termsEl = card.querySelector<HTMLElement>(`[data-display-terms="${planId}"]`);
+
+        if (priceEl && periodData) {
+          if (periodData.isAvailable) {
+            priceEl.textContent = periodData.formattedMonthlyEquivalent;
+            if (termsEl) {
+              if (targetPeriod === 'annual') {
+                termsEl.textContent = `Billed annually (${periodData.formattedTotal}/yr)`;
+              } else if (targetPeriod === 'quarterly') {
+                termsEl.textContent = `Billed quarterly (${periodData.formattedTotal}/quarter)`;
+              } else if (targetPeriod === 'semiannual') {
+                termsEl.textContent = `Billed every 6 months (${periodData.formattedTotal})`;
+              } else {
+                termsEl.textContent = 'Billed monthly (renews at same rate)';
+              }
+            }
+          } else {
+            priceEl.textContent = 'Unavailable';
+            if (termsEl) termsEl.textContent = 'Not supported for this cycle';
+          }
+        }
+      } catch {
+        // Safe parsing
+      }
+    });
+
+    // Also update domain TLD prices
+    const tldPrices: Record<CurrencyCode, Record<string, string>> = {
+      INR: { in: '₹399/yr', com: '₹799/yr', io: '₹2,699/yr' },
+      USD: { in: '$4.99/yr', com: '$9.99/yr', io: '$32.99/yr' },
+      EUR: { in: '€4.49/yr', com: '€8.99/yr', io: '€29.99/yr' },
+    };
+
+    const currencyTlds = tldPrices[targetCurrency] || tldPrices.USD;
+    document.querySelectorAll<HTMLElement>('[data-tld-price]').forEach((el) => {
+      const tld = el.getAttribute('data-tld-price');
+      if (tld && currencyTlds[tld]) {
+        el.textContent = currencyTlds[tld]!;
+      }
+    });
+  }
+
+  function initInteractivePricing() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.billing-tab');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const period = tab.getAttribute('data-billing-tab') as BillingPeriod;
+        if (!period) return;
+        currentPeriod = period;
+
+        tabs.forEach((t) => {
+          t.classList.remove(
+            'active',
+            'bg-[#FFB800]',
+            'text-[#15130F]',
+            'shadow-sm',
+            'font-bold'
+          );
+          t.classList.add('text-[#605A50]', 'font-medium');
+        });
+        tab.classList.add(
+          'active',
+          'bg-[#FFB800]',
+          'text-[#15130F]',
+          'shadow-sm',
+          'font-bold'
+        );
+        tab.classList.remove('text-[#605A50]');
+
+        const currentCurrency = getSavedCurrencyPreference().currency;
+        updateAllPlanCards(currentCurrency, currentPeriod);
+      });
+    });
+
+    const pref = getSavedCurrencyPreference();
+    updateAllPlanCards(pref.currency, currentPeriod);
+
+    window.addEventListener(CURRENCY_CHANGE_EVENT, (e: Event) => {
+      const customEvent = e as CustomEvent<{ currency: CurrencyCode }>;
+      const curr = customEvent.detail?.currency;
+      if (curr) {
+        updateAllPlanCards(curr, currentPeriod);
+      }
+    });
+  }
+
+  function initDomainSearch() {
+    const form = document.getElementById('domain-search-form');
+    const msg = document.getElementById('domain-status-msg');
+    const closeBtn = document.getElementById('domain-status-close');
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      msg?.classList.remove('hidden');
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      msg?.classList.add('hidden');
+    });
+  }
+
+  function initPage() {
+    initInteractivePricing();
+    initDomainSearch();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+  } else {
+    initPage();
+  }
+  document.addEventListener('astro:page-load', initPage);
+</script>
